@@ -33,6 +33,16 @@ android {
     }
 }
 
+tasks.withType<JavaCompile>().configureEach {
+    options.release.set(17)
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2024.12.01"))
 
