@@ -21,14 +21,44 @@ jobs:
           mkdir -p app/src
           cp -r temp_app/app/src/main app/src/
 
-      - name: Aplicar actualizaciones
+      - name: Aplicar MainActivity actualizado
         run: |
           if [ -f "updates/MainActivity.kt" ]; then
             echo "Aplicando MainActivity.kt actualizado..."
             cp updates/MainActivity.kt app/src/main/java/com/example/finanzaspersonales/MainActivity.kt
           else
-            echo "No hay actualizaciones para aplicar."
+            echo "No hay actualización de MainActivity."
           fi
+
+      - name: Aplicar identidad Foxfin
+        run: |
+          echo "Aplicando identidad Foxfin..."
+
+          mkdir -p app/src/main/res/drawable
+
+          if [ -f "foxfin_icon_512.png" ]; then
+            cp foxfin_icon_512.png app/src/main/res/drawable/foxfin_icon.png
+            echo "Icono Foxfin copiado correctamente."
+          else
+            echo "ERROR: No se encontró foxfin_icon_512.png"
+            exit 1
+          fi
+
+          MANIFEST="app/src/main/AndroidManifest.xml"
+
+          if grep -q 'android:label=' "$MANIFEST"; then
+            sed -i 's#android:label="[^"]*"#android:label="Foxfin"#' "$MANIFEST"
+          else
+            sed -i 's#<application#<application android:label="Foxfin"#' "$MANIFEST"
+          fi
+
+          if grep -q 'android:icon=' "$MANIFEST"; then
+            sed -i 's#android:icon="[^"]*"#android:icon="@drawable/foxfin_icon"#' "$MANIFEST"
+          else
+            sed -i 's#<application#<application android:icon="@drawable/foxfin_icon"#' "$MANIFEST"
+          fi
+
+          echo "Nombre e icono Foxfin configurados."
 
       - name: Verificar proyecto
         run: |
@@ -38,13 +68,19 @@ jobs:
           echo "=== CARPETA APP ==="
           ls -la app
 
-          echo "=== CARPETA MAIN ==="
+          echo "=== MAIN ==="
           ls -la app/src/main
 
           echo "=== MAIN ACTIVITY ==="
           ls -la app/src/main/java/com/example/finanzaspersonales/
 
-          echo "=== BUILD GRADLE DE APP ==="
+          echo "=== ICONO FOXFIN ==="
+          ls -la app/src/main/res/drawable/foxfin_icon.png
+
+          echo "=== MANIFEST ==="
+          cat app/src/main/AndroidManifest.xml
+
+          echo "=== BUILD GRADLE ==="
           cat app/build.gradle.kts
 
           echo "=== GRADLE PROPERTIES ==="
@@ -68,5 +104,5 @@ jobs:
       - name: Guardar APK
         uses: actions/upload-artifact@v4
         with:
-          name: FinanzasPersonales-APK
+          name: Foxfin-APK
           path: "**/build/outputs/apk/debug/*.apk"
