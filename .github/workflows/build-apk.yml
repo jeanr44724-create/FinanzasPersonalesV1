@@ -14,20 +14,23 @@ jobs:
       - name: Descargar repositorio
         uses: actions/checkout@v4
 
+      - name: Restaurar carpeta app
+        run: |
+          unzip -o app_completa.zip -d temp_app
+          rm -rf app/src/main
+          mkdir -p app/src
+          cp -r temp_app/app/src/main app/src/
+
       - name: Verificar proyecto
         run: |
           echo "=== RAIZ DEL PROYECTO ==="
           ls -la
-
           echo "=== CARPETA APP ==="
           ls -la app
-
           echo "=== CARPETA MAIN ==="
           ls -la app/src/main
-
           echo "=== BUILD GRADLE DE APP ==="
           cat app/build.gradle.kts
-
           echo "=== GRADLE PROPERTIES ==="
           cat gradle.properties
 
