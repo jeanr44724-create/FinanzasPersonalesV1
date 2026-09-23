@@ -20,7 +20,6 @@ jobs:
           rm -rf app/src/main
           mkdir -p app/src
           cp -r temp_app/app/src/main app/src/
-          cp temp_app/app/build.gradle.kts app/build.gradle.kts
 
       - name: Verificar proyecto
         run: |
@@ -30,6 +29,8 @@ jobs:
           ls -la app
           echo "=== CARPETA MAIN ==="
           ls -la app/src/main
+          echo "=== BUILD GRADLE DE APP ==="
+          cat app/build.gradle.kts
           echo "=== GRADLE PROPERTIES ==="
           cat gradle.properties
 
