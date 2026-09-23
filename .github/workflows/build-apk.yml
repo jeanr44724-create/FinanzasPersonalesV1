@@ -17,15 +17,20 @@ jobs:
       - name: Restaurar carpeta app
         run: |
           unzip -o app_completa.zip -d temp_app
-          cp -r temp_app/app/. app/
+          rm -rf app/src/main
+          mkdir -p app/src
+          cp -r temp_app/app/src/main app/src/
+          cp temp_app/app/build.gradle.kts app/build.gradle.kts
 
       - name: Verificar proyecto
         run: |
-          echo "=== Raíz ==="
+          echo "=== RAIZ DEL PROYECTO ==="
           ls -la
-          echo "=== App ==="
+          echo "=== CARPETA APP ==="
           ls -la app
-          echo "=== Gradle properties ==="
+          echo "=== CARPETA MAIN ==="
+          ls -la app/src/main
+          echo "=== GRADLE PROPERTIES ==="
           cat gradle.properties
 
       - name: Configurar Java
