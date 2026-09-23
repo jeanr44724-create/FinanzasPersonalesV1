@@ -23,9 +23,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
 import java.util.UUID
 
-// ============================================================
-// MODELOS
-// ============================================================
+// ==================== MODELOS ====================
 
 data class Movement(
     val id: String = UUID.randomUUID().toString(),
@@ -42,9 +40,7 @@ data class SavingGoal(
     val saved: Double = 0.0
 )
 
-// ============================================================
-// VIEWMODEL
-// ============================================================
+// ==================== VIEWMODEL ====================
 
 class FinanceViewModel : ViewModel() {
 
@@ -61,20 +57,20 @@ class FinanceViewModel : ViewModel() {
     )
         private set
 
-    val income
+    val income: Double
         get() = movements
             .filter { it.type == "income" }
             .sumOf { it.amount }
 
-    val expenses
+    val expenses: Double
         get() = movements
             .filter { it.type == "expense" }
             .sumOf { it.amount }
 
-    val savings
+    val savings: Double
         get() = goals.sumOf { it.saved }
 
-    val balance
+    val balance: Double
         get() = income - expenses
 
     fun addMovement(
@@ -107,18 +103,14 @@ class FinanceViewModel : ViewModel() {
     }
 
     fun addToGoal(id: String, amount: Double) {
-
         if (amount <= 0) return
 
         goals = goals.map {
-
             if (it.id == id) {
-
                 it.copy(
                     saved = (it.saved + amount)
                         .coerceAtMost(it.target)
                 )
-
             } else {
                 it
             }
@@ -126,77 +118,44 @@ class FinanceViewModel : ViewModel() {
     }
 }
 
-// ============================================================
-// FUNCIONES
-// ============================================================
+fun money(value: Double): String =
+    "$" + "%.2f".format(value)
 
-fun money(value: Double): String {
-    return "$" + "%.2f".format(value)
-}
+// ==================== COLORES ====================
 
-// ============================================================
-// COLORES DE LA APLICACIÓN
-// ============================================================
-
-val FinanceBlue = Color(0xFF102A43)
-val FinanceBlueLight = Color(0xFF1F4E79)
-
+val FinanceBlue = Color(0xFF12355B)
+val FinanceBlue2 = Color(0xFF1E6091)
 val FinanceGreen = Color(0xFF16A085)
-val FinanceGreenLight = Color(0xFFE8F8F5)
-
 val FinanceRed = Color(0xFFE74C3C)
-val FinanceRedLight = Color(0xFFFDEDEC)
-
 val FinanceOrange = Color(0xFFF39C12)
-val FinanceOrangeLight = Color(0xFFFEF5E7)
-
-val FinanceBackground = Color(0xFFF5F7FA)
-val FinanceText = Color(0xFF17202A)
+val FinanceBackground = Color(0xFFF4F7FA)
 val FinanceGray = Color(0xFF6B7280)
 
-// ============================================================
-// TEMA
-// ============================================================
+// ==================== TEMA ====================
 
 @Composable
 fun MainTheme(content: @Composable () -> Unit) {
 
-    val colors = lightColorScheme(
-
-        primary = FinanceBlue,
-        onPrimary = Color.White,
-
-        secondary = FinanceGreen,
-        onSecondary = Color.White,
-
-        background = FinanceBackground,
-        onBackground = FinanceText,
-
-        surface = Color.White,
-        onSurface = FinanceText,
-
-        error = FinanceRed,
-        onError = Color.White
-    )
-
     MaterialTheme(
-        colorScheme = colors,
-        typography = Typography(),
+        colorScheme = lightColorScheme(
+            primary = FinanceBlue,
+            secondary = FinanceGreen,
+            background = FinanceBackground,
+            surface = Color.White,
+            error = FinanceRed
+        ),
         content = content
     )
 }
 
-// ============================================================
-// APLICACIÓN
-// ============================================================
+// ==================== APP ====================
 
 @Composable
 fun App(vm: FinanceViewModel) {
 
-    val navController = rememberNavController()
+    val nav = rememberNavController()
 
     Scaffold(
-
         containerColor = FinanceBackground,
 
         bottomBar = {
@@ -205,88 +164,40 @@ fun App(vm: FinanceViewModel) {
                 containerColor = Color.White
             ) {
 
-                val items = listOf(
-
-                    Triple(
-                        "inicio",
-                        "Inicio",
-                        Icons.Default.Home
-                    ),
-
-                    Triple(
-                        "movimientos",
-                        "Movimientos",
-                        Icons.Default.SwapHoriz
-                    ),
-
-                    Triple(
-                        "ahorros",
-                        "Ahorros",
-                        Icons.Default.Savings
-                    ),
-
-                    Triple(
-                        "estadisticas",
-                        "Stats",
-                        Icons.Default.BarChart
-                    ),
-
-                    Triple(
-                        "deudas",
-                        "Deudas",
-                        Icons.Default.CreditCard
-                    ),
-
-                    Triple(
-                        "salario",
-                        "Salario",
-                        Icons.Default.Payments
-                    )
+                val tabs = listOf(
+                    Triple("inicio", "Inicio", Icons.Default.Home),
+                    Triple("movimientos", "Movimientos", Icons.Default.SwapHoriz),
+                    Triple("ahorros", "Ahorros", Icons.Default.Savings),
+                    Triple("estadisticas", "Stats", Icons.Default.BarChart),
+                    Triple("deudas", "Deudas", Icons.Default.CreditCard),
+                    Triple("salario", "Salario", Icons.Default.Payments)
                 )
 
-                items.forEach { item ->
+                tabs.forEach { tab ->
 
                     NavigationBarItem(
-
-                        selected =
-                            navController.currentDestination?.route ==
-                                    item.first,
-
+                        selected = nav.currentDestination?.route == tab.first,
                         onClick = {
-
-                            navController.navigate(item.first) {
-
+                            nav.navigate(tab.first) {
                                 launchSingleTop = true
-
                             }
                         },
-
                         icon = {
-
-                            Icon(
-                                imageVector = item.third,
-                                contentDescription = item.second
-                            )
+                            Icon(tab.third, contentDescription = tab.second)
                         },
-
                         label = {
-                            Text(item.second)
+                            Text(tab.second)
                         }
                     )
                 }
             }
         }
-
     ) { padding ->
 
         NavHost(
-
-            navController = navController,
-
+            navController = nav,
             startDestination = "inicio",
-
             modifier = Modifier.padding(padding)
-
         ) {
 
             composable("inicio") {
@@ -316,53 +227,45 @@ fun App(vm: FinanceViewModel) {
     }
 }
 
-// ============================================================
-// INICIO
-// ============================================================
+// ==================== INICIO ====================
 
 @Composable
 fun HomeScreen(vm: FinanceViewModel) {
 
-    var showMovementDialog by remember {
+    var showDialog by remember {
         mutableStateOf(false)
     }
 
     LazyColumn(
-
         modifier = Modifier
             .fillMaxSize()
             .background(FinanceBackground)
             .padding(horizontal = 18.dp),
 
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
 
         contentPadding = PaddingValues(
             top = 20.dp,
-            bottom = 30.dp
+            bottom = 25.dp
         )
     ) {
 
         item {
 
             Text(
-                text = "Mis Finanzas",
+                "Mis Finanzas",
                 fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = FinanceText
+                fontWeight = FontWeight.Bold
             )
 
             Text(
-                text = "Controla tu dinero de forma sencilla",
-                color = FinanceGray,
-                fontSize = 14.sp
+                "Controla tu dinero de forma sencilla",
+                color = FinanceGray
             )
         }
 
         item {
-
-            BalanceCard(
-                balance = vm.balance
-            )
+            BalanceCard(vm.balance)
         }
 
         item {
@@ -372,55 +275,49 @@ fun HomeScreen(vm: FinanceViewModel) {
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
 
-                FinanceSummaryCard(
-                    modifier = Modifier.weight(1f),
-                    title = "Ingresos",
-                    value = money(vm.income),
-                    icon = Icons.Default.TrendingUp,
-                    iconColor = FinanceGreen
+                SummaryCard(
+                    Modifier.weight(1f),
+                    "Ingresos",
+                    money(vm.income),
+                    Icons.Default.TrendingUp,
+                    FinanceGreen
                 )
 
-                FinanceSummaryCard(
-                    modifier = Modifier.weight(1f),
-                    title = "Gastos",
-                    value = money(vm.expenses),
-                    icon = Icons.Default.TrendingDown,
-                    iconColor = FinanceRed
+                SummaryCard(
+                    Modifier.weight(1f),
+                    "Gastos",
+                    money(vm.expenses),
+                    Icons.Default.TrendingDown,
+                    FinanceRed
                 )
             }
         }
 
         item {
-
-            SavingsOverview(vm)
+            SavingsCard(vm)
         }
 
         item {
 
             Text(
-                text = "Acciones rápidas",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
+                "Acciones rápidas",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
             )
         }
 
         item {
 
             Button(
-
                 onClick = {
-                    showMovementDialog = true
+                    showDialog = true
                 },
 
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(55.dp),
+                    .height(54.dp),
 
-                shape = RoundedCornerShape(16.dp),
-
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = FinanceBlue
-                )
+                shape = RoundedCornerShape(16.dp)
             ) {
 
                 Icon(
@@ -436,60 +333,27 @@ fun HomeScreen(vm: FinanceViewModel) {
                 )
             }
         }
-
-        item {
-
-            OutlinedButton(
-
-                onClick = { },
-
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-
-                shape = RoundedCornerShape(16.dp)
-            ) {
-
-                Icon(
-                    Icons.Default.BarChart,
-                    contentDescription = null
-                )
-
-                Spacer(Modifier.width(8.dp))
-
-                Text("Ver estadísticas")
-            }
-        }
     }
 
-    if (showMovementDialog) {
-
+    if (showDialog) {
         MovementDialog(vm) {
-
-            showMovementDialog = false
+            showDialog = false
         }
     }
 }
 
-// ============================================================
-// TARJETA DE SALDO
-// ============================================================
+// ==================== SALDO ====================
 
 @Composable
 fun BalanceCard(balance: Double) {
 
     Card(
-
         modifier = Modifier.fillMaxWidth(),
 
         shape = RoundedCornerShape(24.dp),
 
         colors = CardDefaults.cardColors(
             containerColor = FinanceBlue
-        ),
-
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp
         )
     ) {
 
@@ -507,7 +371,7 @@ fun BalanceCard(balance: Double) {
 
                     Text(
                         "Saldo disponible",
-                        color = Color.White.copy(alpha = 0.8f)
+                        color = Color.White.copy(alpha = .75f)
                     )
 
                     Spacer(Modifier.height(5.dp))
@@ -528,49 +392,35 @@ fun BalanceCard(balance: Double) {
                 )
             }
 
-            Spacer(Modifier.height(15.dp))
+            Spacer(Modifier.height(12.dp))
 
             Text(
-                "Este es el dinero restante según tus movimientos registrados.",
-                color = Color.White.copy(alpha = 0.75f),
+                "Ingresos menos gastos registrados",
+                color = Color.White.copy(alpha = .7f),
                 fontSize = 12.sp
             )
         }
     }
 }
 
-// ============================================================
-// TARJETAS RESUMEN
-// ============================================================
+// ==================== RESUMEN ====================
 
 @Composable
-fun FinanceSummaryCard(
-
-    modifier: Modifier = Modifier,
-
+fun SummaryCard(
+    modifier: Modifier,
     title: String,
-
     value: String,
-
     icon: androidx.compose.ui.graphics.vector.ImageVector,
-
     iconColor: Color
-
 ) {
 
     Card(
-
         modifier = modifier,
-
-        shape = RoundedCornerShape(18.dp),
-
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        )
+        shape = RoundedCornerShape(18.dp)
     ) {
 
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(15.dp)
         ) {
 
             Icon(
@@ -580,7 +430,7 @@ fun FinanceSummaryCard(
                 modifier = Modifier.size(28.dp)
             )
 
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(8.dp))
 
             Text(
                 title,
@@ -590,31 +440,23 @@ fun FinanceSummaryCard(
 
             Text(
                 value,
-                fontWeight = FontWeight.Bold,
-                fontSize = 19.sp
+                fontSize = 19.sp,
+                fontWeight = FontWeight.Bold
             )
         }
     }
 }
 
-// ============================================================
-// RESUMEN DE AHORROS
-// ============================================================
+// ==================== AHORROS EN INICIO ====================
 
 @Composable
-fun SavingsOverview(vm: FinanceViewModel) {
+fun SavingsCard(vm: FinanceViewModel) {
 
     val goal = vm.goals.firstOrNull()
 
     Card(
-
         modifier = Modifier.fillMaxWidth(),
-
-        shape = RoundedCornerShape(20.dp),
-
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        )
+        shape = RoundedCornerShape(20.dp)
     ) {
 
         Column(
@@ -630,4 +472,104 @@ fun SavingsOverview(vm: FinanceViewModel) {
 
                     Text(
                         "Meta de ahorro",
-                        font
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    if (goal != null) {
+
+                        Text(
+                            "${money(goal.saved)} de ${money(goal.target)}",
+                            color = FinanceGray,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+
+                Icon(
+                    Icons.Default.Savings,
+                    contentDescription = null,
+                    tint = FinanceGreen
+                )
+            }
+
+            if (goal != null) {
+
+                Spacer(Modifier.height(12.dp))
+
+                val progress =
+                    (goal.saved / goal.target)
+                        .toFloat()
+                        .coerceIn(0f, 1f)
+
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp),
+                    color = FinanceGreen
+                )
+
+                Spacer(Modifier.height(6.dp))
+
+                Text(
+                    "${(progress * 100).toInt()}% completado",
+                    color = FinanceGreen,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp
+                )
+            }
+        }
+    }
+}
+
+// ==================== MOVIMIENTOS ====================
+
+@Composable
+fun MovementsScreen(vm: FinanceViewModel) {
+
+    var show by remember {
+        mutableStateOf(false)
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(FinanceBackground)
+            .padding(18.dp)
+    ) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Column {
+
+                Text(
+                    "Movimientos",
+                    fontSize = 27.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    "Tus ingresos y gastos",
+                    color = FinanceGray
+                )
+            }
+
+            FloatingActionButton(
+                onClick = {
+                    show = true
+                }
+            ) {
+
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = null
+                )
+            }
+        }
+
+       
