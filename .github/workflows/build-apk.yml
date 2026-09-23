@@ -13,10 +13,20 @@ jobs:
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
+
       - name: Restaurar carpeta app
         run: |
           unzip -o app_completa.zip -d temp_app
           cp -r temp_app/app/. app/
+
+      - name: Verificar proyecto
+        run: |
+          echo "=== Raíz ==="
+          ls -la
+          echo "=== App ==="
+          ls -la app
+          echo "=== Gradle properties ==="
+          cat gradle.properties
 
       - name: Configurar Java
         uses: actions/setup-java@v4
