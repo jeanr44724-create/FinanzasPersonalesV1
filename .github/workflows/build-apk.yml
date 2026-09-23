@@ -21,16 +21,32 @@ jobs:
           mkdir -p app/src
           cp -r temp_app/app/src/main app/src/
 
+      - name: Aplicar actualizaciones
+        run: |
+          if [ -f "updates/MainActivity.kt" ]; then
+            echo "Aplicando MainActivity.kt actualizado..."
+            cp updates/MainActivity.kt app/src/main/java/com/example/finanzaspersonales/MainActivity.kt
+          else
+            echo "No hay actualizaciones para aplicar."
+          fi
+
       - name: Verificar proyecto
         run: |
           echo "=== RAIZ DEL PROYECTO ==="
           ls -la
+
           echo "=== CARPETA APP ==="
           ls -la app
+
           echo "=== CARPETA MAIN ==="
           ls -la app/src/main
+
+          echo "=== MAIN ACTIVITY ==="
+          ls -la app/src/main/java/com/example/finanzaspersonales/
+
           echo "=== BUILD GRADLE DE APP ==="
           cat app/build.gradle.kts
+
           echo "=== GRADLE PROPERTIES ==="
           cat gradle.properties
 
