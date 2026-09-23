@@ -14,9 +14,9 @@ jobs:
       - name: Descargar repositorio
         uses: actions/checkout@v4
       - name: Restaurar carpeta app
-  run: |
-    unzip -o app_completa.zip -d temp_app
-    cp -r temp_app/app/. app/
+        run: |
+          unzip -o app_completa.zip -d temp_app
+          cp -r temp_app/app/. app/
 
       - name: Configurar Java
         uses: actions/setup-java@v4
